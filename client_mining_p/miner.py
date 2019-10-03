@@ -1,5 +1,6 @@
 import hashlib
 import requests
+import json
 
 import sys
 
@@ -19,6 +20,7 @@ def valid_proof(block_string, proof):
     guess = f'{block_string}{proof}'.encode()
     guess_hash = hashlib.sha256(guess).hexdigest()
 
+    #Change back to 6 zeroes
     return guess_hash[:6] == "000000"
 
 
@@ -34,7 +36,7 @@ def proof_of_work(block):
     proof = 0
     while valid_proof(block_string, proof) is False:
         proof += 1
-    
+    print("Wow!")
     return proof
 
 if __name__ == '__main__':
@@ -54,8 +56,22 @@ if __name__ == '__main__':
         # TODO: If the server responds with 'New Block Forged'
         # add 1 to the number of coins mined and print it.  Otherwise,
         # print the message from the server.
-        pass
         get = requests.get(url = f"{node}/last_block")
-        last_block = get.json()
+        last_block = get.json()['last_block']
         proof = proof_of_work(last_block)
-        post = requests.post(url = f"{node}/mine")
+
+        block_string = json.dumps(last_block, sort_keys=True).encode()
+        guess = f'{block_string}{proof}'.encode()
+        guess_hash = hashlib.sha256(guess).hexdigest()
+
+        # print(block_string)
+        # print(guess_hash)
+
+        data = {
+            "proof": proof
+        }
+        post = requests.post(url = f"{node}/mine", json=data)
+        # print(post.json())
+        if post.json()['message'] == "New Block Forged":
+            coins_mined += 1
+            print(coins_mined)

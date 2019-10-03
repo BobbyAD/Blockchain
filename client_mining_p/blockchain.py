@@ -102,6 +102,7 @@ class Blockchain(object):
         guess = f'{block_string}{proof}'.encode()
         guess_hash = hashlib.sha256(guess).hexdigest()
 
+        #Change back to six zeroes
         return guess_hash[:6] == "000000"
 
     def valid_chain(self, chain):
@@ -153,10 +154,22 @@ blockchain = Blockchain()
 def mine():
     # We run the proof of work algorithm to get the next proof...
     proof = request.get_json()
-
     block_string = json.dumps(blockchain.last_block, sort_keys=True).encode()
 
-    if blockchain.valid_proof(proof) is not True:
+    print(proof)
+    print(proof['proof'])
+    guess = f'{block_string}{proof["proof"]}'.encode()
+    guess_hash = hashlib.sha256(guess).hexdigest()
+    print(block_string)
+    print(guess_hash)
+
+    if not proof['proof']:
+        response = {
+            'message': 'INVALID JSON'
+        }
+        return jsonify(response), 400
+
+    if blockchain.valid_proof(block_string, proof['proof']) is not True:
         response = {
             'message': 'INVALID PROOF'
         }
@@ -174,7 +187,7 @@ def mine():
 
     # Forge the new Block by adding it to the chain
     previous_hash = blockchain.hash(blockchain.last_block)
-    block = blockchain.new_block(proof, previous_hash)
+    block = blockchain.new_block(proof['proof'], previous_hash)
 
     # Send a response with the new block
     response = {
