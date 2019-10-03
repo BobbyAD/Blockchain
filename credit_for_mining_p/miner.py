@@ -2,8 +2,12 @@ import hashlib
 import requests
 import json
 
+from uuid import uuid4
+
 import sys
 
+import os.path
+from os import path
 
 # TODO: Implement functionality to search for a proof 
 def valid_proof(block_string, proof):
@@ -21,7 +25,7 @@ def valid_proof(block_string, proof):
     guess_hash = hashlib.sha256(guess).hexdigest()
 
     #Change back to 6 zeroes
-    return guess_hash[:6] == "000000"
+    return guess_hash[:3] == "000"
 
 
 def proof_of_work(block):
@@ -45,6 +49,14 @@ if __name__ == '__main__':
         node = sys.argv[1]
     else:
         node = "http://localhost:5000"
+
+    if path.exists("my_id.txt"):
+        pass
+    else:
+        with open("my_id.txt", "w") as text:
+            new_id = str(uuid4()).replace('-', '')
+            text.write(new_id)
+            text.close()
 
     coins_mined = 0
     # Run forever until interrupted
@@ -71,7 +83,7 @@ if __name__ == '__main__':
             "proof": proof
         }
         post = requests.post(url = f"{node}/mine", json=data)
-        # print(post.json())
+        print(post.json())
         if post.json()['message'] == "New Block Forged":
             coins_mined += 1
             print(coins_mined)

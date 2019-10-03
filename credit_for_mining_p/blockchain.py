@@ -103,7 +103,7 @@ class Blockchain(object):
         guess_hash = hashlib.sha256(guess).hexdigest()
 
         #Change back to six zeroes
-        return guess_hash[:6] == "000000"
+        return guess_hash[:3] == "000"
 
     def valid_chain(self, chain):
         """
@@ -156,14 +156,14 @@ def mine():
     proof = request.get_json()
     block_string = json.dumps(blockchain.last_block, sort_keys=True).encode()
 
-    print(proof)
-    print(proof['proof'])
-    guess = f'{block_string}{proof["proof"]}'.encode()
-    guess_hash = hashlib.sha256(guess).hexdigest()
-    print(block_string)
-    print(guess_hash)
+    # print(proof)
+    # print(proof['proof'])
+    # guess = f'{block_string}{proof["proof"]}'.encode()
+    # guess_hash = hashlib.sha256(guess).hexdigest()
+    # print(block_string)
+    # print(guess_hash)
 
-    if not proof['proof']:
+    if type(proof) is not dict and not proof['proof'] and not proof['id']:
         response = {
             'message': 'INVALID JSON'
         }
@@ -181,7 +181,7 @@ def mine():
     # The amount is 1 coin as a reward for mining the next block
     blockchain.new_transaction(
         sender="0",
-        recipient=node_identifier,
+        recipient=proof['id'],
         amount=1
     )
 
