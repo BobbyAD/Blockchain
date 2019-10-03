@@ -50,12 +50,16 @@ if __name__ == '__main__':
     else:
         node = "http://localhost:5000"
 
+    my_id = ""
+
     if path.exists("my_id.txt"):
-        pass
+        with open("my_id.txt", "r") as text:
+            my_id = text.read()
+            print(my_id)
     else:
         with open("my_id.txt", "w") as text:
-            new_id = str(uuid4()).replace('-', '')
-            text.write(new_id)
+            my_id = str(uuid4()).replace('-', '')
+            text.write(my_id)
             text.close()
 
     coins_mined = 0
@@ -80,7 +84,8 @@ if __name__ == '__main__':
         # print(guess_hash)
 
         data = {
-            "proof": proof
+            "proof": proof,
+            "id": my_id
         }
         post = requests.post(url = f"{node}/mine", json=data)
         print(post.json())
